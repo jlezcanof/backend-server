@@ -18,7 +18,7 @@ app.post('/', (req, res) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
-                mensaje: 'Error al buscar usuarios',
+                mensaje: 'Error al buscar usuario',
                 errors: err
             });
         }
@@ -47,8 +47,8 @@ app.post('/', (req, res) => {
         res.status(200).json({
             ok: true,
             usuario: usuarioDB,
-            token: token,
-            id: usuarioDB._id
+            id: usuarioDB._id,
+            token: token
         });
     })
 
