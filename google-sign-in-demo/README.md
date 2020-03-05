@@ -7,6 +7,6 @@ backend server.
 Recuerden que es necesario reconstruir los módulos de
 node, en caso de que se quiera probar localmente
 
-...
+```
 npm install
-...
+```
