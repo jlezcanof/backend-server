@@ -20,13 +20,13 @@ app.get('/coleccion/:tabla/:busqueda', (req, res) => {
     var promesa;
 
     switch (tabla) {
-        case 'usuario':
+        case 'usuarios':
             promesa = buscarUsuarios(busqueda, regex);
             break;
-        case 'hospital':
+        case 'hospitales':
             promesa = buscarHospitales(busqueda, regex);
             break;
-        case 'medico':
+        case 'medicos':
             promesa = buscarMedicos(busqueda, regex);
             break;
         default:
@@ -82,7 +82,7 @@ function buscarHospitales(busqueda, regex) {
     return new Promise((resolve, reject) => {
 
         Hospital.find({ nombre: regex })
-            .populate('usuario', 'nombre email ')
+            .populate('usuario', 'nombre email img')
             .exec((error, hospitales) => {
 
                 if (error) {
@@ -102,7 +102,7 @@ function buscarMedicos(busqueda, regex) {
     return new Promise((resolve, reject) => {
 
         Medico.find({ nombre: regex })
-            .populate('usuario', 'nombre email ')
+            .populate('usuario', 'nombre email img')
             .populate('hospital')
             .exec((error, medicos) => {
 
@@ -121,7 +121,7 @@ function buscarUsuarios(busqueda, regex) {
 
     return new Promise((resolve, reject) => {
 
-        Usuario.find({}, 'nombre email role')
+        Usuario.find({}, 'nombre email role google img')
             .or([{ 'nombre': regex }, { 'email': regex }])
             .exec((err, usuarios) => {
                 if (err) {

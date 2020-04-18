@@ -13,6 +13,9 @@ var CLIENT_ID = require('../config/config').CLIENT_ID;
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(CLIENT_ID);
 
+var mdAutenticacion = require('../middleware/autenticacion');
+
+
 // ==========================================
 // Autenticacion de google
 // ==========================================
@@ -37,6 +40,24 @@ async function verify(token) {
     }
 }
 
+// ==========================================
+// Renovacion token
+// ==========================================
+app.get('/renuevatoken', mdAutenticacion.verificaToken,
+    (req, res) => {
+
+        var token = jwt.sign({ usuario: req.usuario }, SEED, { expiresIn: 14400 }); //4 horas adicionales
+
+        return res.status(200).json({
+            ok: true,
+            token: token
+        });
+
+    });
+
+// ==========================================
+// Autenticacion google sign-in
+// ==========================================
 app.post('/google', async(req, res) => {
 
 
@@ -76,7 +97,8 @@ app.post('/google', async(req, res) => {
                     ok: true,
                     usuario: usuarioDB,
                     id: usuarioDB._id,
-                    token: token
+                    token: token,
+                    menu: obtenerMenu(usuarioDB.role)
                 });
             }
 
@@ -99,7 +121,8 @@ app.post('/google', async(req, res) => {
                     ok: true,
                     usuario: usuarioDB,
                     id: usuarioDB._id,
-                    token: token
+                    token: token,
+                    menu: obtenerMenu(usuarioDB.role)
                 });
 
             })
@@ -107,16 +130,11 @@ app.post('/google', async(req, res) => {
 
     });
 
-    // return res.status(200).json({
-    //     ok: true,
-    //     mensaje: 'OK!!!',
-    //     googleUser: googleUser
-    // });
 });
 
-// ==========================================
-// Autenticacion normal 
-// ==========================================
+// ======================================================
+// Autenticacion normal (credenciales: username/password)
+// ======================================================
 app.post('/', (req, res) => {
 
     var body = req.body;
@@ -156,11 +174,46 @@ app.post('/', (req, res) => {
             ok: true,
             usuario: usuarioDB,
             id: usuarioDB._id,
-            token: token
+            token: token,
+            menu: obtenerMenu(usuarioDB.role)
         });
     })
 
 });
+
+// ==========================
+// Obtener menu dinamicamente
+// ==========================
+function obtenerMenu(ROLE) {
+    var menu = [{
+            titulo: 'Principal',
+            icono: 'mdi mdi-gauge',
+            submenu: [
+                { titulo: 'dashboard', url: '/dashboard' },
+                { titulo: 'ProgressBar', url: '/progress' },
+                { titulo: 'Graficas', url: '/graficas1' },
+                { titulo: 'Promesas', url: '/promesas' },
+                { titulo: 'RxJs', url: '/rxjs' }
+
+            ]
+        },
+        {
+            titulo: 'Mantenimientos',
+            icono: 'mdi mdi-folder-lock-open',
+            submenu: [
+                //{ titulo: 'Usuarios', url: '/usuarios' },
+                { titulo: 'Hospitales', url: '/hospitales' },
+                { titulo: 'Médicos', url: '/medicos' }
+            ]
+        }
+    ];
+    if (ROLE === 'ADMIN_ROLE') {
+        //unshift lo pone al principio, push al final
+        menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
+    }
+
+    return menu;
+}
 
 
 module.exports = app;
